@@ -34,4 +34,32 @@ public class BloqueController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    // Endpoint compatible con el cliente Android: GET /api/bloque/usuario/{usuarioId}
+    @GetMapping("/usuario/{usuarioId}")
+    public List<Bloque> getBloquesByUsuarioPath(@PathVariable Integer usuarioId) {
+        return bloqueRepository.findByUsuarioId(usuarioId);
+    }
+
+    // Actualizar bloque (PUT) — cliente usa PUT, mantenemos lógica simple
+    @PutMapping("/{id}")
+    public ResponseEntity<Bloque> updateBloque(@PathVariable Integer id, @RequestBody Bloque bloqueDetails) {
+        return bloqueRepository.findById(id)
+                .map(b -> {
+                    if (bloqueDetails.getNombre() != null) b.setNombre(bloqueDetails.getNombre());
+                    if (bloqueDetails.getCategoria() != null) b.setCategoria(bloqueDetails.getCategoria());
+                    return ResponseEntity.ok(bloqueRepository.save(b));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Borrar bloque (DELETE)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBloqueById(@PathVariable Integer id) {
+        if (bloqueRepository.existsById(id)) {
+            bloqueRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

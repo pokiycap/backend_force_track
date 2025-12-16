@@ -23,6 +23,12 @@ public class SerieController {
         return serieRepository.findAll();
     }
 
+    // Compatible con cliente Android: GET /api/serie/ejercicio/{ejercicioId}
+    @GetMapping("/ejercicio/{ejercicioId}")
+    public List<Serie> getSeriesByEjercicioPath(@PathVariable Integer ejercicioId) {
+        return serieRepository.findByEjercicioId(ejercicioId);
+    }
+
     @PostMapping
     public Serie createSerie(@RequestBody Serie serie) {
         return serieRepository.save(serie);
@@ -46,5 +52,28 @@ public class SerieController {
                     return ResponseEntity.ok(serieRepository.save(serie));
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Cliente usa PUT para actualizar series
+    @PutMapping("/{id}")
+    public ResponseEntity<Serie> replaceSerie(@PathVariable Integer id, @RequestBody Serie serieDetails) {
+        return serieRepository.findById(id)
+                .map(serie -> {
+                    serie.setPeso(serieDetails.getPeso());
+                    serie.setRepeticiones(serieDetails.getRepeticiones());
+                    serie.setRir(serieDetails.getRir());
+                    serie.setCompletada(serieDetails.getCompletada());
+                    return ResponseEntity.ok(serieRepository.save(serie));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSerie(@PathVariable Integer id) {
+        if (serieRepository.existsById(id)) {
+            serieRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

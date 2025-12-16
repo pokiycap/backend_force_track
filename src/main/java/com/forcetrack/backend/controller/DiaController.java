@@ -23,6 +23,12 @@ public class DiaController {
         return diaRepository.findAll();
     }
 
+    // Endpoint compatible con cliente Android: GET /api/dia/bloque/{bloqueId}
+    @GetMapping("/bloque/{bloqueId}")
+    public List<Dia> getDiasByBloquePath(@PathVariable Integer bloqueId) {
+        return diaRepository.findByBloqueId(bloqueId);
+    }
+
     @PostMapping
     public Dia createDia(@RequestBody Dia dia) {
         return diaRepository.save(dia);
@@ -41,6 +47,20 @@ public class DiaController {
                 .map(dia -> {
                     if (diaDetails.getNombre() != null) dia.setNombre(diaDetails.getNombre());
                     if (diaDetails.getNotas() != null) dia.setNotas(diaDetails.getNotas());
+                    return ResponseEntity.ok(diaRepository.save(dia));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Cliente Android utiliza PUT para actualizar día: añadimos compatibilidad
+    @PutMapping("/{id}")
+    public ResponseEntity<Dia> replaceDia(@PathVariable Integer id, @RequestBody Dia diaDetails) {
+        return diaRepository.findById(id)
+                .map(dia -> {
+                    dia.setNombre(diaDetails.getNombre());
+                    dia.setNotas(diaDetails.getNotas());
+                    dia.setFecha(diaDetails.getFecha());
+                    dia.setNumeroSemana(diaDetails.getNumeroSemana());
                     return ResponseEntity.ok(diaRepository.save(dia));
                 })
                 .orElse(ResponseEntity.notFound().build());

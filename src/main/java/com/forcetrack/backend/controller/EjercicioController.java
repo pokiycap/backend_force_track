@@ -23,6 +23,12 @@ public class EjercicioController {
         return ejercicioRepository.findAll();
     }
 
+    // Compatible con cliente Android: GET /api/ejercicio/dia/{diaId}
+    @GetMapping("/dia/{diaId}")
+    public List<Ejercicio> getEjerciciosByDiaPath(@PathVariable Integer diaId) {
+        return ejercicioRepository.findByDiaId(diaId);
+    }
+
     @PostMapping
     public Ejercicio createEjercicio(@RequestBody Ejercicio ejercicio) {
         return ejercicioRepository.save(ejercicio);
@@ -33,5 +39,25 @@ public class EjercicioController {
         return ejercicioRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Ejercicio> updateEjercicio(@PathVariable Integer id, @RequestBody Ejercicio ejercicioDetails) {
+        return ejercicioRepository.findById(id)
+                .map(ejercicio -> {
+                    if (ejercicioDetails.getNombre() != null) ejercicio.setNombre(ejercicioDetails.getNombre());
+                    if (ejercicioDetails.getDescansoSegundos() != null) ejercicio.setDescansoSegundos(ejercicioDetails.getDescansoSegundos());
+                    return ResponseEntity.ok(ejercicioRepository.save(ejercicio));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEjercicio(@PathVariable Integer id) {
+        if (ejercicioRepository.existsById(id)) {
+            ejercicioRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
